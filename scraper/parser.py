@@ -15,11 +15,12 @@ def parse_card(card):
     )
     item_id = safe_truncate(item_id, 50)
 
-    seller_spans = card.get("__search", {}) \
-        .get("sellerInfo", {}) \
-        .get("text", {}) \
-        .get("textSpans", [])
-
+    seller_spans = (
+        card.get("__search", {})
+            .get("sellerInfo", {})
+            .get("text", {})
+            .get("textSpans", [])
+    )
     seller_id = seller_spans[0]["text"].split(" ")[0] if seller_spans else "unknown"
     seller_id = safe_truncate(seller_id, 50)
 
@@ -35,17 +36,11 @@ def parse_card(card):
 
     price = card.get("displayPrice", {}).get("value", {}).get("value", 0.0)
 
-    delivery_text = ""
     d_spans = card.get("logisticsCost", {}).get("textSpans", [])
-    if d_spans:
-        delivery_text = d_spans[0]["text"]
-    delivery = float(re.sub(r"[^\d.]", "", delivery_text)) if delivery_text else 0.0
+    delivery = float(re.sub(r"[^\d.]", "", d_spans[0]["text"])) if d_spans else 0.0
 
-    qty_text = ""
     q_spans = card.get("quantity", {}).get("textSpans", [])
-    if q_spans:
-        qty_text = q_spans[0]["text"]
-    quantity = int(re.sub(r"[^\d]", "", qty_text)) if qty_text else 0
+    quantity = int(re.sub(r"[^\d]", "", q_spans[0]["text"])) if q_spans else 0
 
     category = safe_truncate(card.get("category", {}).get("displayName", ""), 100)
     link = card.get("action", {}).get("URL", "")
